@@ -216,7 +216,8 @@ int BasicCPU::decodeLoadStore() {
  *		   1: se a instrução não estiver implementada.
  */
 int BasicCPU::decodeDataProcReg() {
-	int n, m, d;
+	int n, m, d, shift, imm6;
+	
 	// TODO
 	//		acrescentar um switch no estilo do switch de decodeDataProcImm,
 	//		e implementar APENAS PARA A INSTRUÇÃO A SEGUIR:
@@ -228,19 +229,37 @@ int BasicCPU::decodeDataProcReg() {
 	{
 		case 0x0B000000:
 			//ADD (shifted register)
+			
+			if (IR & 0x80000000) return 1; // sh = 1 para 64 bits não implementado 
 		
 			// leitura de A e B
-			n = (IR & 0x000003E0) >> 5;
+			n = (IR & 0x000003E0) >> 5; //Rn
 			if (n == 31) {
 				A = SP;
 			} else {
-				A = getX(n); // 64-bit variant
+				A = getW(n); // Variante 32-bit 
 			}
 			
-			m = (IR & 0x001F0000) >> 16;
+			m = (IR & 0x001F0000) >> 16; //Rm
 			
-			B = getX(m); 
+			B = getW(m); 
 			
+			shift = (IR & 0x00C00000) >> 22;
+			
+			imm6 = (IR & 0x0000FC00) >> 10;
+			
+			//Shift tem três operações possíveis
+			
+			switch(shift){ 
+				case 0: //LSL – Logical Shift Left
+					B = B << imm6;
+				case 1: //LSR – Logical Shift Right
+					B = ((unsigned long) B) >> imm6;
+				case 2: //ASL – Arithmetic Shift Left
+					B = ((signed long) B) >> imm6;
+				default:
+					break;
+			}
 			// atribuir ALUctrl
 			ALUctrl = ALUctrlFlag::ADD;
 			

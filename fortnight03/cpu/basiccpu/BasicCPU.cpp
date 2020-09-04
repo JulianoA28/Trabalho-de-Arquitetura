@@ -345,10 +345,10 @@ int BasicCPU::decodeLoadStore() {
 			
 		default:
 			// instrução não implementada
-		return 1;
+		break; // Esse break é necessário para o teste do próximo switch
 	}
 	
-	switch (IR & 0xFFC00000) //Esse switch foi acresentado devido as características da instrução LDR (Register)
+	switch (IR & 0xFFE0FC00) //Esse switch foi acresentado devido as características da instrução LDR (Register)
 	{
 		case 0xB8607800:
 			//LDR (Register) C6.2.121 891
@@ -391,11 +391,12 @@ int BasicCPU::decodeLoadStore() {
 			MemtoReg = true;
 			
 			return 0;
-			
+					
 		default:
 			// instrução não implementada
 		return 1;
 	}
+	
 }
 
 /**

@@ -584,7 +584,7 @@ int BasicCPU::MEM()
 /**
  * Write-back. Escreve resultado da operação no registrador destino.
  * 
- * Retorna 0: se executou corretamente e
+ * Retorna 0: se executou corretamente 
  *		   1: se o controle presente nos registradores auxiliares não
  * 				estiver implementado.
  */

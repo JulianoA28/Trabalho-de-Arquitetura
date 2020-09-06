@@ -1,23 +1,22 @@
 /*
  Trabalho Final
+ 
  GCC117 - Arquitetura de Computadores I
- Universidade Federal de Lavras
+ Universidade Federal de Lavras 
  2020/1
  Prof. André Vital Saúde
   
  Grupo:
+	 201811266 - André Marçal Medeiros
      202010444 - Caio Matheus Leite da Silva (apresentador)
-     2
-     2
-  	 2
+     201810092 - Jonathan Nascimento Carvalho
+  	 201811302 - Juliano Expedito de Andrade Carvalho
  
  Instrução apresentada:
-      str (linha )
- */
-
+      str w1, [x0] (linha 46)
+*/
 
 /* ----------------------------------------------------------------------------
-
     (EN) armethyst - A simple ARM Simulator written in C++ for Computer Architecture
     teaching purposes. Free software licensed under the MIT License (see license
     below).
@@ -47,7 +46,6 @@
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
-
    ----------------------------------------------------------------------------
 */
 
@@ -106,26 +104,11 @@ void BasicCPU::IF()
  * e escreve em registradores auxiliares o que será usado por estágios
  * posteriores.
  *
- * Escreve A, B e ALUctrl para o estágio EXI
- * ATIVIDADE FUTURA: escreve registradores para os estágios EXF, MEM e WB.
- *
  * Retorna 0: se executou corretamente e
  *		   1: se a instrução não estiver implementada.
  */
 int BasicCPU::ID()
-{
-	// TODO
-	//		Acrescente os cases no switch já iniciado, para detectar o grupo
-	//		APENAS PARA A INSTRUÇÃO A SEGUIR:
-	//				'add w1, w1, w0'
-	//		que aparece na linha 40 de isummation.S e no endereço 0x74
-	//		de txt_isummation.o.txt.
-	//
-	// 		Deve-se detectar em IR o grupo da qual a instrução faz parte e
-	//		chamar a função 'decodeGROUP()' para	o grupo detectado, onde GROUP
-	//		é o sufixo do nome da função que decodifica as instruções daquele
-	//		grupo. Para 'add w1, w1, w0' deve-se chamar 'decodeDataProcReg()'.
-	
+{	
 	int group = IR & 0x1E000000; // bits 28-25
 	
 	switch (group)
@@ -148,7 +131,7 @@ int BasicCPU::ID()
 		case 0x08000000: // x = 0 y = 0
 		case 0x0C000000: // x = 0 y = 1
 		case 0x18000000: // x = 1 y = 0
-		case 0x1C000000: // x = 1 y = 1
+		case 0x1C000000: // x = 1 y = 1 
 			fpOP = false;
 			return decodeLoadStore();
 			break;
@@ -202,7 +185,7 @@ int BasicCPU::decodeDataProcImm() {
 			imm = (IR & 0x003FFC00) >> 10;
 			B = imm;
 			
-			// registrador destino
+			// Registrador destino
 			d = (IR & 0x0000001F);
 			if (d == 31) {
 				Rd = &SP;
@@ -233,8 +216,7 @@ int BasicCPU::decodeDataProcImm() {
 }
 
 /**
- * ATIVIDADE FUTURA: Decodifica instruções do grupo
- * 		101x Branches, Exception Generating and System instructions
+ * 101x Branches, Exception Generating and System instructions
  *
  * Retorna 0: se executou corretamente e
  *		   1: se a instrução não estiver implementada.
@@ -250,8 +232,9 @@ int BasicCPU::decodeBranches() {
 			
 			A = PC;
 			
-			B = (((int32_t)imm26) << 6) >> 4;
+			B = (((int32_t)imm26) << 6) >> 4; 
 			
+			// Registrador destino
 			Rd = &PC;
 			
 			//ALUctrl
@@ -268,7 +251,7 @@ int BasicCPU::decodeBranches() {
 			
 			return 0;
 	}
-	return 1;
+	return 1; // instrução não implementada
 }
 
 /**
@@ -297,7 +280,7 @@ int BasicCPU::decodeLoadStore() {
 
 			B = imm12 << 2; //pimm que é múltiplo de 4
 			
-			// registrador destino
+			// Registrador destino
 			d = (IR & 0x0000001F);
 			if (d == 31) {
 				Rd = &SP;
@@ -335,7 +318,7 @@ int BasicCPU::decodeLoadStore() {
 
 			B = imm12 << 2; //pimm que é múltiplo de 4
 			
-			// registrador destino
+			// Registrador destino
 			d = (IR & 0x0000001F);
 			if (d == 31) {
 				Rd = &SP;
@@ -358,21 +341,23 @@ int BasicCPU::decodeLoadStore() {
 			return 0;
 		
 		case 0xB9000000:
-			//STR C6.2.257 Unsigned offset
+			//STR C6.2.257 Unsigned offset // 
+						
+			//Variante 32 bits
 			
 			n = (IR & 0x000003E0) >> 5; // Rn
-			
-			imm12 = ( IR & 0x003FFC00) >> 10;
 			
 			if (n == 31) {
 				A = SP;
 			} else {
-				A = getX(n); // 64-bit variant
+				A = getW(n); // 32-bit variant
 			}
+			
+			imm12 = ( IR & 0x003FFC00) >> 10;
 
 			B = imm12 << 2; //pimm que é múltiplo de 4
 			
-			// registrador destino
+			// Registrador destino
 			d = (IR & 0x0000001F);
 			if (d == 31) {
 				Rd = &SP;
@@ -417,7 +402,7 @@ int BasicCPU::decodeLoadStore() {
 				B = getX(n) << 2;// Vai entrar nesse case se for: size 10, option 011 e s 1
 			}
 			
-			// registrador destino
+			// Registrador destino
 			d = (IR & 0x0000001F);
 			if (d == 31) {
 				Rd = &SP;
@@ -452,13 +437,6 @@ int BasicCPU::decodeLoadStore() {
  */
 int BasicCPU::decodeDataProcReg() {
 	int n, m, d, shift, imm6;
-	
-	// TODO
-	//		acrescentar um switch no estilo do switch de decodeDataProcImm,
-	//		e implementar APENAS PARA A INSTRUÇÃO A SEGUIR:
-	//				'add w1, w1, w0'
-	//		que aparece na linha 40 de isummation.S e no endereço 0x74
-	//		de txt_isummation.o.txt.
 	
 	switch (IR & 0xFF200000)
 	{
@@ -496,7 +474,7 @@ int BasicCPU::decodeDataProcReg() {
 					break;
 			}
 			
-			// registrador destino
+			// Registrador destino
 			d = (IR & 0x0000001F);
 			if (d == 31) {
 				Rd = &SP;
@@ -552,15 +530,6 @@ int BasicCPU::decodeDataProcFloat() {
  */
 int BasicCPU::EXI()
 {
-	// TODO
-	//		Acrescente os cases no switch já iniciado, para acrescentar a
-	//		execução APENAS PARA A INSTRUÇÃO A SEGUIR:
-	//				'add w1, w1, w0'
-	//		que aparece na linha 40 de isummation.S e no endereço 0x74
-	//		de txt_isummation.o.txt.
-	//
-	// 		Verifique que ALUctrlFlag já tem declarado o tipo de operação
-	//		executada por 'add w1, w1, w0'.
 	switch (ALUctrl)
 	{
 		case ALUctrlFlag::SUB:
@@ -605,11 +574,6 @@ int BasicCPU::EXF()
  */
 int BasicCPU::MEM()
 {
-	// TODO
-	// Implementar o switch (MEMctrl) case MEMctrlFlag::XXX com as
-	// chamadas aos métodos corretos que implementam cada caso de
-	// acesso à memória de dados.
-	// não implementado
     switch (MEMctrl) {
     case MEMctrlFlag::READ32:
         MDR = memory->readData32(ALUout);
@@ -646,7 +610,6 @@ int BasicCPU::WB()
 	// atribuições corretas do registrador destino, quando houver, ou
 	// return 0 no caso WBctrlFlag::WB_NONE.
 	
-	// não implementado
     switch (WBctrl) {
         case WBctrlFlag::WB_NONE:
             return 0;
